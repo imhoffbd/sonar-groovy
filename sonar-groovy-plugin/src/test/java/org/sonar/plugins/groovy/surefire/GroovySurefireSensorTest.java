@@ -60,7 +60,7 @@ public class GroovySurefireSensorTest {
 
     MapSettings settings = new MapSettings();
     settings.setProperty(GroovyPlugin.FILE_SUFFIXES_KEY, ".groovy,grvy");
-    groovy = new Groovy(settings);
+    groovy = new Groovy(settings.asConfig());
 
     GroovySurefireParser parser = spy(new GroovySurefireParser(groovy, fs));
 
@@ -68,14 +68,14 @@ public class GroovySurefireSensorTest {
         .when(parser)
         .getUnitTestInputFile(anyString());
 
-    surefireSensor = new GroovySurefireSensor(parser, settings, fs, pathResolver);
+    surefireSensor = new GroovySurefireSensor(parser, settings.asConfig(), fs, pathResolver);
   }
 
   @Test
   public void test_description() {
     surefireSensor =
         new GroovySurefireSensor(
-            new GroovySurefireParser(groovy, fs), new MapSettings(), fs, pathResolver);
+            new GroovySurefireParser(groovy, fs), new MapSettings().asConfig(), fs, pathResolver);
     DefaultSensorDescriptor defaultSensorDescriptor = new DefaultSensorDescriptor();
     surefireSensor.describe(defaultSensorDescriptor);
     assertThat(defaultSensorDescriptor.languages()).containsOnly(Groovy.KEY);
@@ -87,7 +87,7 @@ public class GroovySurefireSensorTest {
     settings.setProperty(SurefireUtils.SUREFIRE_REPORTS_PATH_PROPERTY, "unknown");
 
     GroovySurefireSensor surefireSensor =
-        new GroovySurefireSensor(mock(GroovySurefireParser.class), settings, fs, pathResolver);
+        new GroovySurefireSensor(mock(GroovySurefireParser.class), settings.asConfig(), fs, pathResolver);
     surefireSensor.execute(mock(SensorContext.class));
   }
 

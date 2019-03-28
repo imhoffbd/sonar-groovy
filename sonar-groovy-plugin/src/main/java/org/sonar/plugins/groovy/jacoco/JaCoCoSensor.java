@@ -24,7 +24,7 @@ import java.nio.file.Path;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
-import org.sonar.api.config.Settings;
+import org.sonar.api.config.Configuration;
 import org.sonar.api.scan.filesystem.PathResolver;
 import org.sonar.plugins.groovy.foundation.Groovy;
 import org.sonar.plugins.groovy.foundation.GroovyFileSystem;
@@ -36,13 +36,13 @@ public class JaCoCoSensor implements Sensor {
   private final JaCoCoConfiguration configuration;
   private final GroovyFileSystem fileSystem;
   private final PathResolver pathResolver;
-  private final Settings settings;
+  private final Configuration settings;
 
   public JaCoCoSensor(
       JaCoCoConfiguration configuration,
       GroovyFileSystem fileSystem,
       PathResolver pathResolver,
-      Settings settings) {
+      Configuration settings) {
     this.configuration = configuration;
     this.fileSystem = fileSystem;
     this.pathResolver = pathResolver;

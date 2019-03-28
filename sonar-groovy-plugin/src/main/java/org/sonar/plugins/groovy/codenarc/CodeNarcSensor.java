@@ -21,12 +21,15 @@ package org.sonar.plugins.groovy.codenarc;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.apache.commons.io.FileUtils;
@@ -71,15 +74,15 @@ public class CodeNarcSensor implements Sensor {
   @Override
   public void execute(SensorContext context) {
     // Should we reuse existing report from CodeNarc ?
-    if (context.settings().hasKey(GroovyPlugin.CODENARC_REPORT_PATHS)) {
+    if (context.config().hasKey(GroovyPlugin.CODENARC_REPORT_PATHS)) {
       // Yes
       String[] codeNarcReportPaths =
-          context.settings().getStringArray(GroovyPlugin.CODENARC_REPORT_PATHS);
-      String codeNarcReportPath = context.settings().getString(GroovyPlugin.CODENARC_REPORT_PATH);
-      if (codeNarcReportPaths.length == 0) {
-        codeNarcReportPaths = new String[] {codeNarcReportPath};
+          context.config().getStringArray(GroovyPlugin.CODENARC_REPORT_PATHS);
+      Optional<String> codeNarcReportPath = context.config().get(GroovyPlugin.CODENARC_REPORT_PATH);
+      if (codeNarcReportPaths.length == 0 && codeNarcReportPath.isPresent()) {
+        codeNarcReportPaths = new String[] {codeNarcReportPath.get()};
       }
-      List<File> reports = new ArrayList<File>();
+      List<File> reports = new ArrayList<>();
       for (String path : codeNarcReportPaths) {
         File report = context.fileSystem().resolvePath(path);
         if (!report.isFile() || !report.exists()) {
@@ -149,13 +152,13 @@ public class CodeNarcSensor implements Sensor {
   private void runCodeNarc(SensorContext context) {
     LOG.info("Executing CodeNarc");
 
-    File workdir = new File(context.fileSystem().workDir(), "codenarc");
+    Path workdir = context.fileSystem().workDir().toPath().resolve("codenarc");
     prepareWorkDir(workdir);
-    File codeNarcConfiguration = new File(workdir, "profile.xml");
+    Path codeNarcConfiguration = workdir.resolve("profile.xml");
     exportCodeNarcConfiguration(codeNarcConfiguration);
 
     CodeNarcRunner runner = new CodeNarcRunner();
-    runner.setRuleSetFiles("file:" + codeNarcConfiguration.getAbsolutePath());
+    runner.setRuleSetFiles(codeNarcConfiguration.toUri().toString());
 
     CodeNarcSourceAnalyzer analyzer =
         new CodeNarcSourceAnalyzer(groovyFileSystem.sourceInputFiles());
@@ -197,21 +200,19 @@ public class CodeNarcSensor implements Sensor {
     return context.fileSystem().inputFile(context.fileSystem().predicates().hasAbsolutePath(path));
   }
 
-  private void exportCodeNarcConfiguration(File file) {
-    try {
-      StringWriter writer = new StringWriter();
+  private void exportCodeNarcConfiguration(Path file) {
+    try (Writer writer = Files.newBufferedWriter(file)) {
       new CodeNarcProfileExporter(writer).exportProfile(activeRules);
-      FileUtils.writeStringToFile(file, writer.toString());
     } catch (IOException e) {
       throw new IllegalStateException("Can not generate CodeNarc configuration file", e);
     }
   }
 
-  private static void prepareWorkDir(File dir) {
+  private static void prepareWorkDir(Path dir) {
     try {
-      FileUtils.forceMkdir(dir);
+      Files.createDirectories(dir);
       // directory is cleaned, because Sonar 3.0 will not do this for us
-      FileUtils.cleanDirectory(dir);
+      FileUtils.cleanDirectory(dir.toFile());
     } catch (IOException e) {
       throw new IllegalStateException("Cannot create directory: " + dir, e);
     }

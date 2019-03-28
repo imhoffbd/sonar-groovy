@@ -94,7 +94,7 @@ public final class CodeNarcXMLParser implements StaxParser.XmlStreamHandler {
     }
   }
 
-  private String getFilename(List<String> sourceDirectories, String packPath, String attrFilename) throws XMLStreamException {
+  private String getFilename(List<String> sourceDirectories, String packPath, String attrFilename) {
     FilePredicates pred = fileSystem.predicates();
     for (String directory : sourceDirectories) {
       String path = directory + packPath + "/" + attrFilename;

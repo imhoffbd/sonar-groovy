@@ -78,11 +78,11 @@ public class JaCoCoItSensorTest {
             .setLines(50)
             .build();
     fileSystem.add(inputFile);
-    configuration = new JaCoCoConfiguration(settings, fileSystem);
+    configuration = new JaCoCoConfiguration(settings.asConfig(), fileSystem);
 
     sensor =
         new JaCoCoSensor(
-            configuration, new GroovyFileSystem(fileSystem), new PathResolver(), settings);
+            configuration, new GroovyFileSystem(fileSystem), new PathResolver(), settings.asConfig());
   }
 
   @Test

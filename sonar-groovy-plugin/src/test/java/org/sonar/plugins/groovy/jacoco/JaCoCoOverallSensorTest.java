@@ -80,13 +80,13 @@ public class JaCoCoOverallSensorTest {
             .build();
     context.fileSystem().add(inputFile);
 
-    configuration = new JaCoCoConfiguration(settings, context.fileSystem());
+    configuration = new JaCoCoConfiguration(settings.asConfig(), context.fileSystem());
     sensor =
         new JaCoCoSensor(
             configuration,
             new GroovyFileSystem(context.fileSystem()),
             new PathResolver(),
-            settings);
+            settings.asConfig());
   }
 
   @Test

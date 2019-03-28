@@ -19,15 +19,14 @@
  */
 package org.sonar.plugins.groovy.surefire.api;
 
+import java.io.File;
+import java.util.Optional;
+import javax.annotation.CheckForNull;
 import org.sonar.api.batch.fs.FileSystem;
-import org.sonar.api.config.Settings;
+import org.sonar.api.config.Configuration;
 import org.sonar.api.scan.filesystem.PathResolver;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
-
-import javax.annotation.CheckForNull;
-
-import java.io.File;
 
 public final class SurefireUtils {
 
@@ -37,7 +36,7 @@ public final class SurefireUtils {
   private SurefireUtils() {
   }
 
-  public static File getReportsDirectory(Settings settings, FileSystem fs, PathResolver pathResolver) {
+  public static File getReportsDirectory(Configuration settings, FileSystem fs, PathResolver pathResolver) {
     File dir = getReportsDirectoryFromProperty(settings, fs, pathResolver);
     if (dir == null) {
       dir = new File(fs.baseDir(), "target/surefire-reports");
@@ -46,11 +45,11 @@ public final class SurefireUtils {
   }
 
   @CheckForNull
-  private static File getReportsDirectoryFromProperty(Settings settings, FileSystem fs, PathResolver pathResolver) {
-    String path = settings.getString(SUREFIRE_REPORTS_PATH_PROPERTY);
-    if (path != null) {
+  private static File getReportsDirectoryFromProperty(Configuration settings, FileSystem fs, PathResolver pathResolver) {
+    Optional<String> path = settings.get(SUREFIRE_REPORTS_PATH_PROPERTY);
+    if (path.isPresent()) {
       try {
-        return pathResolver.relativeFile(fs.baseDir(), path);
+        return pathResolver.relativeFile(fs.baseDir(), path.get());
       } catch (Exception e) {
         LOGGER.info("Surefire report path: " + fs.baseDir() + "/" + path + " not found.", e);
       }

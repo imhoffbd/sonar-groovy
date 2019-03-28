@@ -42,7 +42,7 @@ public class JaCoCoConfigurationTest {
         new MapSettings(
             new PropertyDefinitions().addComponents(JaCoCoConfiguration.getPropertyDefinitions()));
     fileSystem = new DefaultFileSystem(Paths.get("."));
-    jacocoSettings = new JaCoCoConfiguration(settings, fileSystem);
+    jacocoSettings = new JaCoCoConfiguration(settings.asConfig(), fileSystem);
   }
 
   @Test

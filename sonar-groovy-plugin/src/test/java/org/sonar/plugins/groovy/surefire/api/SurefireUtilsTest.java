@@ -39,14 +39,14 @@ public class SurefireUtilsTest {
   public void should_get_reports_from_property() {
     MapSettings settings = new MapSettings();
     settings.setProperty("sonar.junit.reportsPath", "target/surefire");
-    assertThat(SurefireUtils.getReportsDirectory(settings, fs, pathResolver).exists()).isTrue();
-    assertThat(SurefireUtils.getReportsDirectory(settings, fs, pathResolver).isDirectory())
+    assertThat(SurefireUtils.getReportsDirectory(settings.asConfig(), fs, pathResolver).exists()).isTrue();
+    assertThat(SurefireUtils.getReportsDirectory(settings.asConfig(), fs, pathResolver).isDirectory())
         .isTrue();
   }
 
   @Test
   public void return_default_value_if_property_unset() throws Exception {
-    File directory = SurefireUtils.getReportsDirectory(new MapSettings(), fs, pathResolver);
+    File directory = SurefireUtils.getReportsDirectory(new MapSettings().asConfig(), fs, pathResolver);
     assertThat(directory.getCanonicalPath())
         .endsWith("target" + File.separator + "surefire-reports");
     assertThat(directory.exists()).isFalse();
@@ -57,7 +57,7 @@ public class SurefireUtilsTest {
   public void return_default_value_if_can_not_read_file() throws Exception {
     MapSettings settings = new MapSettings();
     settings.setProperty("sonar.junit.reportsPath", "../target/\u0000:surefire");
-    File directory = SurefireUtils.getReportsDirectory(settings, fs, pathResolver);
+    File directory = SurefireUtils.getReportsDirectory(settings.asConfig(), fs, pathResolver);
     assertThat(directory.getCanonicalPath())
         .endsWith("target" + File.separator + "surefire-reports");
     assertThat(directory.exists()).isFalse();
